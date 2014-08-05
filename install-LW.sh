@@ -11,9 +11,109 @@ MOD_CONFIG_DIR=${MOD_DATA_DIR}/xew/xcomgame/config
 FERAL_OVERRIDES="xew/xcomgame/localization/int/xcomgame.int xew/xcomgame/localization/int/xcomuishell.int"
 FERAL_OVERRIDE_DIR="xew/binaries/share/feraloverrides"
 
-LW_FILES=`find ${MOD_DATA_DIR} -type f | sed s,${MOD_DATA_DIR},,g`
+LW_FILES=`find ${MOD_DATA_DIR}/ -type f | sed s,${MOD_DATA_DIR}/,,g`
 
 echo "Installing Long War for XCOM:EW, please, be patient..."
+
+dry_run=true
+function cp_() {
+	if $dry_run; then
+		echo cp $*
+	else
+		cp $*
+	fi
+}
+
+function mkdir_() {
+	if $dry_run; then
+		echo mkdir $*
+	else
+		mkdir $*
+	fi
+}
+
+function rm_() {
+	if $dry_run; then
+		echo rm $*
+	else
+		rm $*
+	fi
+}
+
+function uninstall() {
+	echo "should uninstall now"
+}
+
+function backup() {
+	mkdir_ $userbackup
+	mkdir_ $gamebackup
+
+	# backup user files
+	usersaves=$USERFILES/savedata
+	userconf=$USERFILES/WritableFiles
+
+	cp_ -r $usersaves $userbackup/savedata
+	cp_ -r $userconf $userbackup/WritableFiles
+
+	# iterate through LW files and backup corresponding game files
+	# for each LW upk file check if corresponding .upk.uncompressed_size file exist and back it up
+	for file in ${LW_FILES}; do
+		case "$file" in
+			*upk)
+				if [ -e ${INSTALLDIR}/$file.uncompressed_size ]; then
+					cp_ ${INSTALLDIR}/$file.uncompressed_size $gamebackup/$file.uncompressed_size
+				fi
+				;;
+		esac
+	done
+
+	# backup xcomgame.int and xcomuishell.int in feraloverrides
+	for file in ${FERAL_OVERRIDES}; do
+		if [ -e ${INSTALLDIR}/${FERAL_OVERRIDE_DIR}/`basename $file` ]; then
+			cp_ "${INSTALLDIR}/${FERAL_OVERRIDE_DIR}/`basename $file`" ${gamebackup}/${FERAL_OVERRIDE_DIR}/`basename $file`
+		fi
+	done
+
+	# backup remaining files
+	for file in ${LW_FILES}; do
+		if [ -e ${INSTALLDIR}/${file} ]; then
+			cp_ ${INSTALLDIR}/${file} ${gamebackup}/
+		fi
+	done
+}
+
+function install() {
+	# for each LW upk file check if corresponding .upk.uncompressed_size file exist and delete it
+	for file in ${LW_FILES}; do
+		case "$file" in
+			*upk)
+				if [ -e ${INSTALLDIR}/$file.uncompressed_size ]; then
+					rm_ ${INSTALLDIR}/$file.uncompressed_size $gamebackup/$file.uncompressed_size
+				fi
+				;;
+		esac
+	done
+
+	# copy LW files to game dir
+	cp_ -r ${MOD_DATA_DIR}/* ${INSTALLDIR}
+	INSTALLED_FILES="${LW_FILES}"
+
+	# copy xcomgame.int and xcomuishell.int to feraloverrides
+	for file in ${FERAL_OVERRIDES}; do
+		cp_ ${MOD_DATA_DIR}/$file ${INSTALLDIR}/${FERAL_OVERRIDE_DIR}/`basename $file`
+		INSTALLED_FILES="${INSTALLED_FILES}${FERAL_OVERRIDE_DIR}/`basename $file`"
+	done
+
+	# copy LW defaultgamecore.ini to WritableFiles/XComGameCore.ini
+	cp_ ${MOD_CONFIG_DIR}/defaultgamecore.ini ${USERFILES}/WritableFiles/XComGameCore.ini
+
+	# copy LW defaultloadouts.ini to WritableFiles/XComLoadouts.ini
+	cp_ ${MOD_CONFIG_DIR}/defaultloadouts.ini ${USERFILES}/WritableFiles/XComLoadouts.ini
+
+	if ! ${dry_run}; then
+		echo "${INSTALLED_FILES}" > "${INSTALLDIR}/.lw_install"
+	fi
+}
 
 # checking command line parameters
 if [ -z $1 ]
@@ -47,9 +147,23 @@ if [ -d $installdir ]
 		exit 1
 fi
 
-# backup existing files
+# backup location for existing files
 userbackup=$USERFILES/backup
 gamebackup=$installdir/backup
+
+keep_saves=false
+if [ -f "${INSTALLDIR}/.lw_install" ]; then
+	echo -n "Old version of LW found. Keep savegames? (y/n)"
+	read yn
+	if [[ $yn == y || $yn == Y ]]; then
+		echo "keeping savegames"
+		keep_saves=true
+	else
+		echo "not keeping savegames"
+	fi
+
+	uninstall
+fi
 
 echo "Writing backup to:"
 
@@ -69,7 +183,6 @@ echo "User files: $userbackup"
 #	fi
 #fi
   
-mkdir $userbackup
 
 echo "Game files: $gamebackup"
 
@@ -87,58 +200,16 @@ echo "Game files: $gamebackup"
 #	fi
 #fi
   
-mkdir $gamebackup
 
-# backup user files
-usersaves=$USERFILES/savedata
-userconf=$USERFILES/WritableFiles
-
-cp -r $usersaves $userbackup
-cp -r $userconf $userbackup
+backup
 
 # clear user files
-rm -f $usersaves/*
-rm -f $userconf/*
+if ! ${keep_saves}; then
+	rm_ -f $usersaves/*
+fi
+rm_ -f $userconf/*
 
-# iterate through LW files and backup corresponding game files
-# for each LW upk file check if corresponding .upk.uncompressed_size file exist, back it up and delete
-for file in ${LW_FILES}; do
-	case "$file" in
-		*upk)
-			if [ -e ${INSTALLDIR}/$file.uncompressed_size ]; then
-				mv ${INSTALLDIR}/$file.uncompressed_size $gamebackup/$file.uncompressed_size
-			fi
-			;;
-	esac
-done
-
-# backup xcomgame.int and xcomuishell.int in feraloverrides
-for file in ${FERAL_OVERRIDES}; do
-	if [ -e ${INSTALLDIR}/${FERAL_OVERRIDE_DIR}/`basename $file` ]; then
-		mv "${INSTALLDIR}/${FERAL_OVERRIDE_DIR}/`basename $file`" ${gamebackup}/${FERAL_OVERRIDE_DIR}/`basename $file`
-	fi
-done
-
-# backup remaining files
-for file in ${LW_FILES}; do
-	if [ -e ${INSTALLDIR}/${file} ]; then
-		mv ${INSTALLDIR}/${file} ${gamebackup}/
-	fi
-done
-
-# copy LW files to game dir
-cp -r ${MOD_DATA_DIR}/* ${INSTALLDIR}
-
-# copy xcomgame.int and xcomuishell.int to feraloverrides
-for file in ${FERAL_OVERRIDES}; do
-	cp ${MOD_DATA_DIR}/$file ${INSTALLDIR}/${FERAL_OVERRIDE_DIR}/`basename $file`
-done
-
-# copy LW defaultgamecore.ini to WritableFiles/XComGameCore.ini
-cp ${MOD_CONFIG_DIR}/defaultgamecore.ini ${USERFILES}/WritableFiles/XComGameCore.ini
-
-# copy LW defaultloadouts.ini to WritableFiles/XComLoadouts.ini
-cp ${MOD_CONFIG_DIR}/defaultloadouts.ini ${USERFILES}/WritableFiles/XComLoadouts.ini
+install
 
 exit 0
 
