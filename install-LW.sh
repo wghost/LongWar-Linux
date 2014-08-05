@@ -3,7 +3,15 @@
 
 # default values
 USERFILES=~/.local/share/feral-interactive/XCOM/XEW
-INSTALLDIR=~/.local/share/Steam/SteamApps/common/XCom-Enemy-Unknown/xew
+INSTALLDIR=~/.local/share/Steam/SteamApps/common/XCom-Enemy-Unknown
+
+MOD_DATA_DIR=`dirname $0`/install-files
+MOD_CONFIG_DIR=${MOD_DATA_DIR}/xew/xcomgame/config
+
+FERAL_OVERRIDES="xew/xcomgame/localization/int/xcomgame.int xew/xcomgame/localization/int/xcomuishell.int"
+FERAL_OVERRIDE_DIR="xew/binaries/share/feraloverrides"
+
+LW_FILES=`find ${MOD_DATA_DIR} -type f | sed s,${MOD_DATA_DIR},,g`
 
 echo "Installing Long War for XCOM:EW, please, be patient..."
 
@@ -89,21 +97,48 @@ cp -r $usersaves $userbackup
 cp -r $userconf $userbackup
 
 # clear user files
-#rm -f $usersaves/*
-#rm -f $userconf/*
+rm -f $usersaves/*
+rm -f $userconf/*
 
 # iterate through LW files and backup corresponding game files
 # for each LW upk file check if corresponding .upk.uncompressed_size file exist, back it up and delete
+for file in ${LW_FILES}; do
+	case "$file" in
+		*upk)
+			if [ -e ${INSTALLDIR}/$file.uncompressed_size ]; then
+				mv ${INSTALLDIR}/$file.uncompressed_size $gamebackup/$file.uncompressed_size
+			fi
+			;;
+	esac
+done
 
 # backup xcomgame.int and xcomuishell.int in feraloverrides
+for file in ${FERAL_OVERRIDES}; do
+	if [ -e ${INSTALLDIR}/${FERAL_OVERRIDE_DIR}/`basename $file` ]; then
+		mv "${INSTALLDIR}/${FERAL_OVERRIDE_DIR}/`basename $file`" ${gamebackup}/${FERAL_OVERRIDE_DIR}/`basename $file`
+	fi
+done
+
+# backup remaining files
+for file in ${LW_FILES}; do
+	if [ -e ${INSTALLDIR}/${file} ]; then
+		mv ${INSTALLDIR}/${file} ${gamebackup}/
+	fi
+done
 
 # copy LW files to game dir
+cp -r ${MOD_DATA_DIR}/* ${INSTALLDIR}
 
 # copy xcomgame.int and xcomuishell.int to feraloverrides
+for file in ${FERAL_OVERRIDES}; do
+	cp ${MOD_DATA_DIR}/$file ${INSTALLDIR}/${FERAL_OVERRIDE_DIR}/`basename $file`
+done
 
 # copy LW defaultgamecore.ini to WritableFiles/XComGameCore.ini
+cp ${MOD_CONFIG_DIR}/defaultgamecore.ini ${USERFILES}/WritableFiles/XComGameCore.ini
 
 # copy LW defaultloadouts.ini to WritableFiles/XComLoadouts.ini
+cp ${MOD_CONFIG_DIR}/defaultloadouts.ini ${USERFILES}/WritableFiles/XComLoadouts.ini
 
 exit 0
 
