@@ -93,6 +93,7 @@ cp -r $userconf $userbackup
 #rm -f $userconf/*
 
 # iterate through LW files and backup corresponding game files
+# for each LW upk file check if corresponding .upk.uncompressed_size file exist, back it up and delete
 
 # backup xcomgame.int and xcomuishell.int in feraloverrides
 
