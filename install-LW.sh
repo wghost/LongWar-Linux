@@ -101,7 +101,8 @@ function install() {
 	# copy xcomgame.int and xcomuishell.int to feraloverrides
 	for file in ${FERAL_OVERRIDES}; do
 		cp_ ${MOD_DATA_DIR}/$file ${installdir}/${FERAL_OVERRIDE_DIR}/`basename $file`
-		INSTALLED_FILES="${INSTALLED_FILES}${FERAL_OVERRIDE_DIR}/`basename $file`"
+		INSTALLED_FILES="${INSTALLED_FILES}
+${FERAL_OVERRIDE_DIR}/`basename $file`"
 	done
 
 	# copy LW defaultgamecore.ini to WritableFiles/XComGameCore.ini
