@@ -49,8 +49,8 @@ function backup() {
 	mkdir_ $gamebackup
 
 	# backup user files
-	usersaves=$USERFILES/savedata
-	userconf=$USERFILES/WritableFiles
+	usersaves=$userfiles/savedata
+	userconf=$userfiles/WritableFiles
 
 	cp_ -r $usersaves $userbackup/savedata
 	cp_ -r $userconf $userbackup/WritableFiles
@@ -60,8 +60,8 @@ function backup() {
 	for file in ${LW_FILES}; do
 		case "$file" in
 			*upk)
-				if [ -e ${INSTALLDIR}/$file.uncompressed_size ]; then
-					cp_ ${INSTALLDIR}/$file.uncompressed_size $gamebackup/$file.uncompressed_size
+				if [ -e ${installdir}/$file.uncompressed_size ]; then
+					cp_ ${installdir}/$file.uncompressed_size $gamebackup/$file.uncompressed_size
 				fi
 				;;
 		esac
@@ -69,15 +69,15 @@ function backup() {
 
 	# backup xcomgame.int and xcomuishell.int in feraloverrides
 	for file in ${FERAL_OVERRIDES}; do
-		if [ -e ${INSTALLDIR}/${FERAL_OVERRIDE_DIR}/`basename $file` ]; then
-			cp_ "${INSTALLDIR}/${FERAL_OVERRIDE_DIR}/`basename $file`" ${gamebackup}/${FERAL_OVERRIDE_DIR}/`basename $file`
+		if [ -e ${installdir}/${FERAL_OVERRIDE_DIR}/`basename $file` ]; then
+			cp_ "${installdir}/${FERAL_OVERRIDE_DIR}/`basename $file`" ${gamebackup}/${FERAL_OVERRIDE_DIR}/`basename $file`
 		fi
 	done
 
 	# backup remaining files
 	for file in ${LW_FILES}; do
-		if [ -e ${INSTALLDIR}/${file} ]; then
-			cp_ ${INSTALLDIR}/${file} ${gamebackup}/
+		if [ -e ${installdir}/${file} ]; then
+			cp_ ${installdir}/${file} ${gamebackup}/
 		fi
 	done
 }
@@ -87,31 +87,31 @@ function install() {
 	for file in ${LW_FILES}; do
 		case "$file" in
 			*upk)
-				if [ -e ${INSTALLDIR}/$file.uncompressed_size ]; then
-					rm_ ${INSTALLDIR}/$file.uncompressed_size $gamebackup/$file.uncompressed_size
+				if [ -e ${installdir}/$file.uncompressed_size ]; then
+					rm_ ${installdir}/$file.uncompressed_size $gamebackup/$file.uncompressed_size
 				fi
 				;;
 		esac
 	done
 
 	# copy LW files to game dir
-	cp_ -r ${MOD_DATA_DIR}/* ${INSTALLDIR}
+	cp_ -r ${MOD_DATA_DIR}/* ${installdir}
 	INSTALLED_FILES="${LW_FILES}"
 
 	# copy xcomgame.int and xcomuishell.int to feraloverrides
 	for file in ${FERAL_OVERRIDES}; do
-		cp_ ${MOD_DATA_DIR}/$file ${INSTALLDIR}/${FERAL_OVERRIDE_DIR}/`basename $file`
+		cp_ ${MOD_DATA_DIR}/$file ${installdir}/${FERAL_OVERRIDE_DIR}/`basename $file`
 		INSTALLED_FILES="${INSTALLED_FILES}${FERAL_OVERRIDE_DIR}/`basename $file`"
 	done
 
 	# copy LW defaultgamecore.ini to WritableFiles/XComGameCore.ini
-	cp_ ${MOD_CONFIG_DIR}/defaultgamecore.ini ${USERFILES}/WritableFiles/XComGameCore.ini
+	cp_ ${MOD_CONFIG_DIR}/defaultgamecore.ini ${userfiles}/WritableFiles/XComGameCore.ini
 
 	# copy LW defaultloadouts.ini to WritableFiles/XComLoadouts.ini
-	cp_ ${MOD_CONFIG_DIR}/defaultloadouts.ini ${USERFILES}/WritableFiles/XComLoadouts.ini
+	cp_ ${MOD_CONFIG_DIR}/defaultloadouts.ini ${userfiles}/WritableFiles/XComLoadouts.ini
 
 	if ! ${dry_run}; then
-		echo "${INSTALLED_FILES}" > "${INSTALLDIR}/.lw_install"
+		echo "${INSTALLED_FILES}" > "${installdir}/.lw_install"
 	fi
 }
 
@@ -148,11 +148,11 @@ if [ -d $installdir ]
 fi
 
 # backup location for existing files
-userbackup=$USERFILES/backup
+userbackup=$userfiles/backup
 gamebackup=$installdir/backup
 
 keep_saves=false
-if [ -f "${INSTALLDIR}/.lw_install" ]; then
+if [ -f "${installdir}/.lw_install" ]; then
 	echo -n "Old version of LW found. Keep savegames? (y/n)"
 	read yn
 	if [[ $yn == y || $yn == Y ]]; then
