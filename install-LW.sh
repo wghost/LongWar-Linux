@@ -15,7 +15,7 @@ LW_FILES=`find ${MOD_DATA_DIR}/ -type f | sed s,${MOD_DATA_DIR}/,,g`
 
 echo "Installing Long War for XCOM:EW, please, be patient..."
 
-dry_run=true
+dry_run=false
 function cp_() {
 	if $dry_run; then
 		echo cp $*
@@ -47,6 +47,7 @@ function uninstall() {
 function backup() {
 	mkdir_ $userbackup
 	mkdir_ $gamebackup
+	mkdir_ $gamebackup/feraloverrides
 
 	# backup user files
 	usersaves=$userfiles/savedata
@@ -70,7 +71,7 @@ function backup() {
 	# backup xcomgame.int and xcomuishell.int in feraloverrides
 	for file in ${FERAL_OVERRIDES}; do
 		if [ -e ${installdir}/${FERAL_OVERRIDE_DIR}/`basename $file` ]; then
-			cp_ "${installdir}/${FERAL_OVERRIDE_DIR}/`basename $file`" ${gamebackup}/${FERAL_OVERRIDE_DIR}/`basename $file`
+			cp_ "${installdir}/${FERAL_OVERRIDE_DIR}/`basename $file`" ${gamebackup}/feraloverrides/`basename $file`
 		fi
 	done
 
@@ -101,7 +102,8 @@ function install() {
 	# copy xcomgame.int and xcomuishell.int to feraloverrides
 	for file in ${FERAL_OVERRIDES}; do
 		cp_ ${MOD_DATA_DIR}/$file ${installdir}/${FERAL_OVERRIDE_DIR}/`basename $file`
-		INSTALLED_FILES="${INSTALLED_FILES}${FERAL_OVERRIDE_DIR}/`basename $file`"
+		INSTALLED_FILES="${INSTALLED_FILES}
+${FERAL_OVERRIDE_DIR}/`basename $file`"
 	done
 
 	# copy LW defaultgamecore.ini to WritableFiles/XComGameCore.ini
@@ -149,7 +151,7 @@ fi
 
 # backup location for existing files
 userbackup=$userfiles/backup
-gamebackup=$installdir/backup
+gamebackup=$installdir/xew/backup
 
 keep_saves=false
 if [ -f "${installdir}/.lw_install" ]; then
