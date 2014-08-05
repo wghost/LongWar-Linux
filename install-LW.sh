@@ -16,9 +16,10 @@ LW_FILES=`find ${MOD_DATA_DIR}/ -type f | sed s,${MOD_DATA_DIR}/,,g`
 echo "Installing Long War for XCOM:EW, please, be patient..."
 
 dry_run=true
+backup_data=true
 function cp_() {
 	if $dry_run; then
-		echo cp $*
+		echo cp $* >&2
 	else
 		cp $*
 	fi
@@ -26,7 +27,7 @@ function cp_() {
 
 function mkdir_() {
 	if $dry_run; then
-		echo mkdir $*
+		echo mkdir $* >&2
 	else
 		mkdir $*
 	fi
@@ -34,14 +35,55 @@ function mkdir_() {
 
 function rm_() {
 	if $dry_run; then
-		echo rm $*
+		echo rm $* >&2
 	else
 		rm $*
 	fi
 }
 
+function mv_() {
+	if $dry_run; then
+		echo mv $* >&2
+	else
+		mv $*
+	fi
+}
+
 function uninstall() {
-	echo "should uninstall now"
+	echo "uninstalling old version now"
+	if [ -e "${installdir}/backup_oldLW" -o -e "${userfiles}/backup_oldLW" ]; then
+		echo "found old LW backup in ${installdir}/backup_oldLW or ${userfiles}/backup_oldLW"
+		echo -en "\e[0;31mremove old LW backup files?\e[0m (y/n)"
+		read yn
+		if [[ $yn == y || $yn == Y ]]
+		then
+			echo "Removing old LW backup and all its content..."
+			rm_ -rf ${installdir}/backup_oldLW
+			rm_ -rf ${userfiles}/backup_oldLW
+		else
+			exit 1
+		fi
+	fi
+
+	mkdir_ ${installdir}/backup_oldLW
+	while read file; do
+		mv_ ${installdir}/${file} ${installdir}/backup_oldLW
+	done < ${installdir}/.lw_install
+
+	usersaves=$userfiles/savedata
+	userconf=$userfiles/WritableFiles
+	cp_ -r $usersaves ${installdir}/backup_oldLW
+	mv_ $userconf ${userfiles}/backup_oldLW
+
+	# restore original files
+	cp_ -r ${installdir}/backup/* ${installdir}/
+	# no need to restore savedata or userdata since both would just be deleted anyway
+
+	rm_ -f ${installdir}/.lw_install
+
+	echo "old LW version backed up in:"
+	echo ${installdir}/backup_oldLW
+	echo ${userfiles}/backup_oldLW
 }
 
 function backup() {
@@ -52,8 +94,8 @@ function backup() {
 	usersaves=$userfiles/savedata
 	userconf=$userfiles/WritableFiles
 
-	cp_ -r $usersaves $userbackup/savedata
-	cp_ -r $userconf $userbackup/WritableFiles
+	cp_ -r $usersaves $userbackup
+	cp_ -r $userconf $userbackup
 
 	# iterate through LW files and backup corresponding game files
 	# for each LW upk file check if corresponding .upk.uncompressed_size file exist and back it up
@@ -88,7 +130,7 @@ function install() {
 		case "$file" in
 			*upk)
 				if [ -e ${installdir}/$file.uncompressed_size ]; then
-					rm_ ${installdir}/$file.uncompressed_size $gamebackup/$file.uncompressed_size
+					rm_ -f ${installdir}/$file.uncompressed_size
 				fi
 				;;
 		esac
@@ -111,7 +153,7 @@ ${FERAL_OVERRIDE_DIR}/`basename $file`"
 	# copy LW defaultloadouts.ini to WritableFiles/XComLoadouts.ini
 	cp_ ${MOD_CONFIG_DIR}/defaultloadouts.ini ${userfiles}/WritableFiles/XComLoadouts.ini
 
-	if ! ${dry_run}; then
+	if  ${dry_run}; then
 		echo "${INSTALLED_FILES}" > "${installdir}/.lw_install"
 	fi
 }
@@ -154,7 +196,7 @@ gamebackup=$installdir/backup
 
 keep_saves=false
 if [ -f "${installdir}/.lw_install" ]; then
-	echo -n "Old version of LW found. Keep savegames? (y/n)"
+	echo -ne "\e[0;31mOld version of LW found. Keep savegames?\e[0m (y/n)"
 	read yn
 	if [[ $yn == y || $yn == Y ]]; then
 		echo "keeping savegames"
@@ -164,45 +206,31 @@ if [ -f "${installdir}/.lw_install" ]; then
 	fi
 
 	uninstall
+	backup_data=false
 fi
 
-echo "Writing backup to:"
+if ${backup_data}; then
+	# check if backup dir already exist
+	if [ -d ${userbackup} -o -d ${gamebackup} ]; then
+		echo "old backup already exists in ${userbackup} or ${gamebackup}."
+		echo -n "Owerwrite old backup? (y/n) "
+		read yn
+		if [[ $yn == y || $yn == Y ]]
+		then
+			echo "Removing old backup and all its content..."
+			rm_ -rf $userbackup
+			rm_ -rf $gamebackup
+		else
+			exit 1
+		fi
+	fi
 
-echo "User files: $userbackup"
+	backup
 
-# check if backup dir already exist
-#if [ -d $userbackup ]
-#	then
-#		echo -n "$userbackup already exists. Owerwrite? (y/n) "
-#		read yn
-#	if [[ $yn == y || $yn == Y ]]
-#		then
-#			echo "Removing $userbackup and all its content..."
-#			rm -rf $userbackup
-#		else
-#			exit 1
-#	fi
-#fi
-  
-
-echo "Game files: $gamebackup"
-
-# check if backup dir already exist
-#if [ -d $gamebackup ]
-#	then
-#		echo -n "$gamebackup already exists. Owerwrite? (y/n) "
-#		read yn
-#	if [[ $yn == y || $yn == Y ]]
-#		then
-#			echo "Removing $gamebackup and all its content..."
-#			rm -rf $gamebackup
-#		else
-#			exit 1
-#	fi
-#fi
-  
-
-backup
+	echo "Wrote backup to:"
+	echo "User files: $userbackup"
+	echo "Game files: $gamebackup"
+fi
 
 # clear user files
 if ! ${keep_saves}; then
@@ -211,6 +239,8 @@ fi
 rm_ -f $userconf/*
 
 install
+
+echo -e "\e[0;32mLong War installed successful.\e[0m"
 
 exit 0
 
