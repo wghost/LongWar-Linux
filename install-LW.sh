@@ -3,19 +3,20 @@
 
 # default values
 USERFILES=~/.local/share/feral-interactive/XCOM/XEW
-INSTALLDIR=~/.local/share/Steam/SteamApps/common/XCom-Enemy-Unknown
+INSTALLDIR=~/.local/share/Steam/SteamApps/common/XCom-Enemy-Unknown/xew
 
 MOD_DATA_DIR=`dirname $0`/install-files
-MOD_CONFIG_DIR=${MOD_DATA_DIR}/xew/xcomgame/config
+MOD_CONFIG_DIR=${MOD_DATA_DIR}/xcomgame/config
 
-FERAL_OVERRIDES="xew/xcomgame/localization/int/xcomgame.int xew/xcomgame/localization/int/xcomuishell.int"
-FERAL_OVERRIDE_DIR="xew/binaries/share/feraloverrides"
+FERAL_OVERRIDES="xcomgame/localization/int/xcomgame.int xcomgame/localization/int/xcomuishell.int"
+FERAL_OVERRIDE_DIR="binaries/share/feraloverrides"
 
 LW_FILES=`find ${MOD_DATA_DIR}/ -type f | sed s,${MOD_DATA_DIR}/,,g`
 
 echo "Installing Long War for XCOM:EW, please, be patient..."
 
 dry_run=false
+
 function cp_() {
 	if $dry_run; then
 		echo cp $*
@@ -62,7 +63,7 @@ function backup() {
 		case "$file" in
 			*upk)
 				if [ -e ${installdir}/$file.uncompressed_size ]; then
-					cp_ ${installdir}/$file.uncompressed_size $gamebackup/$file.uncompressed_size
+					cp_ ${installdir}/$file.uncompressed_size $gamebackup/`basename $file`.uncompressed_size
 				fi
 				;;
 		esac
@@ -89,7 +90,7 @@ function install() {
 		case "$file" in
 			*upk)
 				if [ -e ${installdir}/$file.uncompressed_size ]; then
-					rm_ ${installdir}/$file.uncompressed_size $gamebackup/$file.uncompressed_size
+					rm_ ${installdir}/$file.uncompressed_size
 				fi
 				;;
 		esac
@@ -151,7 +152,7 @@ fi
 
 # backup location for existing files
 userbackup=$userfiles/backup
-gamebackup=$installdir/xew/backup
+gamebackup=$installdir/backup
 
 keep_saves=false
 if [ -f "${installdir}/.lw_install" ]; then
@@ -211,7 +212,11 @@ if ! ${keep_saves}; then
 fi
 rm_ -f $userconf/*
 
+echo "Copying install files..."
+
 install
+
+echo "Done. Now run the game. Remeber to check your game settings (especially video settings)."
 
 exit 0
 
