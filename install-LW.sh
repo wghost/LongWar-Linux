@@ -3,7 +3,7 @@
 
 # default values
 USERFILES=~/.local/share/feral-interactive/XCOM/XEW
-INSTALLDIR=~/.steam/steam/SteamApps/common/XCom-Enemy-Unknown/xew
+INSTALLDIR=~/.local/share/Steam/SteamApps/common/XCom-Enemy-Unknown/xew
 
 MOD_DATA_DIR=`dirname $0`/install-files
 MOD_CONFIG_DIR=${MOD_DATA_DIR}/xcomgame/config
