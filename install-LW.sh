@@ -3,7 +3,7 @@
 
 # default values
 USERFILES=~/.local/share/feral-interactive/XCOM/XEW
-INSTALLDIR=~/.local/share/Steam/SteamApps/common/XCom-Enemy-Unknown/xew
+INSTALLDIR=~/.steam/steam/SteamApps/common/XCom-Enemy-Unknown/xew
 
 MOD_DATA_DIR=`dirname $0`/install-files
 MOD_CONFIG_DIR=${MOD_DATA_DIR}/xcomgame/config
@@ -13,8 +13,10 @@ FERAL_OVERRIDE_DIR="binaries/share/feraloverrides"
 
 LW_FILES=`find ${MOD_DATA_DIR}/ -type f | sed s,${MOD_DATA_DIR}/,,g`
 
+SELFNAME=`basename $0`
+
 IS_UNINSTALL=false
-if [ `basename $0` = "uninstall-LW.sh" ]; then
+if [ $SELFNAME = "uninstall-LW.sh" ]; then
 	IS_UNINSTALL=true
 fi
 
@@ -43,6 +45,14 @@ function rm_() {
 		echo rm $*
 	else
 		rm $*
+	fi
+}
+
+function ln_() {
+	if $dry_run; then
+		echo ln $*
+	else
+		ln $*
 	fi
 }
 
@@ -121,6 +131,11 @@ ${FERAL_OVERRIDE_DIR}/`basename $file`"
 	if ! ${dry_run}; then
 		echo "${INSTALLED_FILES}" > "${installdir}/.lw_install"
 	fi
+	
+	if [ ! -e "${installdir}/binaries/linux/${SELFNAME}" ]; then
+		cp_ $0 "${installdir}/binaries/linux"
+		ln_ -s "${installdir}/binaries/linux/${SELFNAME}" "${installdir}/binaries/linux/uninstall-LW.sh"
+	fi
 }
 
 # checking command line parameters
@@ -159,7 +174,7 @@ fi
 userbackup=$userfiles/backup
 gamebackup=$installdir/backup
 
-if [ $IS_UNINSTALL ]; then
+if $IS_UNINSTALL; then
 	if [ -f "${installdir}/.lw_install" ]; then
 		uninstall
 	fi
