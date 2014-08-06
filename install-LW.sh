@@ -4,6 +4,7 @@
 # default values
 USERFILES=~/.local/share/feral-interactive/XCOM/XEW
 INSTALLDIR=~/.local/share/Steam/SteamApps/common/XCom-Enemy-Unknown/xew
+INSTALLDIR2=~/.steam/steam/SteamApps/common/XCom-Enemy-Unknown/xew
 
 MOD_DATA_DIR=`dirname $0`/install-files
 MOD_CONFIG_DIR=${MOD_DATA_DIR}/xcomgame/config
@@ -210,14 +211,31 @@ ${FERAL_OVERRIDE_DIR}/`basename $file`"
 # checking command line parameters
 if [ -z $1 ]
 	then
-		userfiles=$USERFILES
+		userfiles=${USERFILES}
 	else
 		userfiles=$1
 fi
 
 if [ -z $2 ]
 	then
-		installdir=$INSTALLDIR
+		if [ -d ${INSTALLDIR} ]; then
+			installdir=${INSTALLDIR}
+		else
+			if [ -d ${INSTALLDIR2} ]; then
+				installdir=${INSTALLDIR2};
+			else
+				echo "Can not find game files. Please specify location of xew dir"
+				read installdir
+				installdir="${installdir%/}"
+				if [ `basename "${installdir}"` != xew ]; then
+					installdir="${installdir}/xew"
+				fi
+				if [ ! -d ${installdir} ]; then
+					echo "invalid directory specified."
+					exit 1
+				fi
+			fi
+		fi
 	else
 		installdir=$2
 fi
@@ -228,14 +246,6 @@ if [ -d $userfiles ]
 		echo "User files dir: $userfiles"
 	else
 		echo "$userfiles is not a directory!"
-		exit 1
-fi
-
-if [ -d $installdir ]
-	then
-		echo "Install dir: $installdir"
-	else
-		echo "$installdir is not a directory!"
 		exit 1
 fi
 
