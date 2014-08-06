@@ -59,13 +59,37 @@ function mv_() {
 
 function ln_() {
 	if $dry_run; then
-		echo ln $*
+		echo ln $* >&2
 	else
 		ln $*
 	fi
 }
 
 function uninstall() {
+	echo "uninstalling LW mod now"
+
+	# delete mod files
+	while read file; do
+		rm_ -f ${installdir}/${file}
+	done < ${installdir}/.lw_install
+
+	usersaves=$userfiles/savedata
+	userconf=$userfiles/WritableFiles
+	rm_ -f $usersaves/*
+	rm_ -f $userconf/*
+
+	# restore original files
+	cp_ -r ${installdir}/backup/* ${installdir}/
+	cp_ -r ${userbackup}/* ${userfiles}
+
+	# delete restored backups
+	rm_ -rf ${userbackup} ${gamebackup}
+	rm_ -f ${installdir}/.lw_install
+
+	echo "Everything should be restored to pre mod versions."
+}
+
+function uninstall_old() {
 	echo "uninstalling old version now"
 	if [ -e "${installdir}/backup_oldLW" -o -e "${userfiles}/backup_oldLW" ]; then
 		echo "found old LW backup in ${installdir}/backup_oldLW or ${userfiles}/backup_oldLW"
@@ -81,6 +105,7 @@ function uninstall() {
 		fi
 	fi
 
+	# backup old LW files
 	mkdir_ ${installdir}/backup_oldLW
 	while read file; do
 		mv_ ${installdir}/${file} ${installdir}/backup_oldLW
@@ -89,7 +114,7 @@ function uninstall() {
 	usersaves=$userfiles/savedata
 	userconf=$userfiles/WritableFiles
 	cp_ -r $usersaves ${installdir}/backup_oldLW
-	mv_ $userconf ${userfiles}/backup_oldLW
+	cp_ -r $userconf ${userfiles}/backup_oldLW
 
 	# restore original files
 	cp_ -r ${installdir}/backup/* ${installdir}/
@@ -105,7 +130,6 @@ function uninstall() {
 function backup() {
 	mkdir_ $userbackup
 	mkdir_ $gamebackup
-	mkdir_ $gamebackup/feraloverrides
 
 	# backup user files
 	usersaves=$userfiles/savedata
@@ -120,7 +144,8 @@ function backup() {
 		case "$file" in
 			*upk)
 				if [ -e ${installdir}/$file.uncompressed_size ]; then
-					cp_ ${installdir}/$file.uncompressed_size $gamebackup/`basename $file`.uncompressed_size
+					mkdir_ -p ${gamebackup}/`dirname $file`
+					cp_ ${installdir}/$file.uncompressed_size $gamebackup/$file.uncompressed_size
 				fi
 				;;
 		esac
@@ -129,14 +154,16 @@ function backup() {
 	# backup xcomgame.int and xcomuishell.int in feraloverrides
 	for file in ${FERAL_OVERRIDES}; do
 		if [ -e ${installdir}/${FERAL_OVERRIDE_DIR}/`basename $file` ]; then
-			cp_ "${installdir}/${FERAL_OVERRIDE_DIR}/`basename $file`" ${gamebackup}/feraloverrides/`basename $file`
+			mkdir_ -p ${gamebackup}/`dirname $file`
+			cp_ "${installdir}/${FERAL_OVERRIDE_DIR}/`basename $file`" ${gamebackup}/$file
 		fi
 	done
 
 	# backup remaining files
 	for file in ${LW_FILES}; do
 		if [ -e ${installdir}/${file} ]; then
-			cp_ ${installdir}/${file} ${gamebackup}/
+			mkdir_ -p ${gamebackup}/`dirname $file`
+			cp_ ${installdir}/${file} ${gamebackup}/$file
 		fi
 	done
 }
@@ -170,7 +197,7 @@ ${FERAL_OVERRIDE_DIR}/`basename $file`"
 	# copy LW defaultloadouts.ini to WritableFiles/XComLoadouts.ini
 	cp_ ${MOD_CONFIG_DIR}/defaultloadouts.ini ${userfiles}/WritableFiles/XComLoadouts.ini
 
-	if  ${dry_run}; then
+	if ! ${dry_run}; then
 		echo "${INSTALLED_FILES}" > "${installdir}/.lw_install"
 	fi
 	
@@ -218,10 +245,17 @@ gamebackup=$installdir/backup
 
 if $IS_UNINSTALL; then
 	if [ -f "${installdir}/.lw_install" ]; then
-		uninstall
+		echo -ne "\e[0;31mThis will delete all mod savegames and configs. Are you sure?\e[0m (y/n)"
+		read yn
+		if [[ $yn == y || $yn == Y ]]; then
+			uninstall
+		else
+			echo "you can find the savegames in ${userfiles}/savedata and settings in ${userfiles}/WritableFiles if you want to back them up."
+		fi
+	else
+		echo "LW install not found!"
 	fi
 	
-	echo "Done"
 	exit 0
 fi
 
@@ -236,7 +270,7 @@ if [ -f "${installdir}/.lw_install" ]; then
 		echo "not keeping savegames"
 	fi
 
-	uninstall
+	uninstall_old
 	backup_data=false
 fi
 
@@ -264,6 +298,8 @@ if ${backup_data}; then
 fi
 
 # clear user files
+usersaves=$userfiles/savedata
+userconf=$userfiles/WritableFiles
 if ! ${keep_saves}; then
 	rm_ -f $usersaves/*
 fi
