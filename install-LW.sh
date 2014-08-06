@@ -13,7 +13,12 @@ FERAL_OVERRIDE_DIR="binaries/share/feraloverrides"
 
 LW_FILES=`find ${MOD_DATA_DIR}/ -type f | sed s,${MOD_DATA_DIR}/,,g`
 
-echo "Installing Long War for XCOM:EW, please, be patient..."
+IS_UNINSTALL=false
+if [ `basename $0` = "uninstall-LW.sh" ]; then
+	IS_UNINSTALL=true
+fi
+
+$IS_UNINSTALL && echo "Uninstalling Long War for XCOM:EW, please, be patient..." || echo "Installing Long War for XCOM:EW, please, be patient..."
 
 dry_run=false
 
@@ -153,6 +158,15 @@ fi
 # backup location for existing files
 userbackup=$userfiles/backup
 gamebackup=$installdir/backup
+
+if [ $IS_UNINSTALL ]; then
+	if [ -f "${installdir}/.lw_install" ]; then
+		uninstall
+	fi
+	
+	echo "Done"
+	exit 0
+fi
 
 keep_saves=false
 if [ -f "${installdir}/.lw_install" ]; then
