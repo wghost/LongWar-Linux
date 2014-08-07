@@ -29,7 +29,7 @@ Install notes
    Script will also overwrite user files. By default those are searched in:
    ~/.local/share/feral-interactive/XCOM/XEW
    
-   If you have XCOM:EW installed to some other location, you'll have to pass that location to script via command line:
+   If you have XCOM:EW installed to some other location, you will be prompted to enter it. Or you can pass that location to script via command line:
    ./install-LW.sh /path/to/XEW/userfiles /path/to/XEW/install/dir
    
 3. Install script will automatically backup you profile, existing saved games, user configuration files and vanilla game resources.
@@ -54,7 +54,7 @@ Uninstall notes
 
 1. Run uninstall-LW.sh script to remove LW-EW and revert to previously backed up vanilla game.
 
-2. Script will delete all the modded files and restore original ones. This includes profile and vanilla saved games. LW-EW saved games will be deleted.
+2. Script will delete all the modded files and restore original ones, including profile and vanilla saved games. LW-EW saved games will be deleted.
 
 3. Default saved games location is
    ~/.local/share/feral-interactive/XCOM/XEW/savedata
