@@ -6,8 +6,8 @@ USERFILES=~/.local/share/feral-interactive/XCOM/XEW
 INSTALLDIR=~/.local/share/Steam/SteamApps/common/XCom-Enemy-Unknown/xew
 INSTALLDIR2=~/.steam/steam/SteamApps/common/XCom-Enemy-Unknown/xew
 
-MOD_DATA_DIR=`dirname $0`/install-files
-MOD_CONFIG_DIR=${MOD_DATA_DIR}/xcomgame/config
+MOD_DATA_DIR="`dirname $0`/install-files"
+MOD_CONFIG_DIR="${MOD_DATA_DIR}/xcomgame/config"
 
 FERAL_OVERRIDES="xcomgame/localization/int/xcomgame.int xcomgame/localization/int/xcomuishell.int"
 FERAL_OVERRIDE_DIR="binaries/share/feraloverrides"
@@ -71,8 +71,8 @@ function uninstall() {
 
 	# delete mod files
 	while read file; do
-		rm_ -f ${installdir}/${file}
-	done < ${installdir}/.lw_install
+		rm_ -f "${installdir}/${file}"
+	done < "${installdir}/.lw_install"
 
 	usersaves=$userfiles/savedata
 	userconf=$userfiles/WritableFiles
@@ -80,12 +80,12 @@ function uninstall() {
 	rm_ -f $userconf/*
 
 	# restore original files
-	cp_ -r ${installdir}/backup/* ${installdir}/
-	cp_ -r ${userbackup}/* ${userfiles}
+	cp_ -r "${installdir}/backup/*" "${installdir}/"
+	cp_ -r "${userbackup}/*" "${userfiles}"
 
 	# delete restored backups
-	rm_ -rf ${userbackup} ${gamebackup}
-	rm_ -f ${installdir}/.lw_install
+	rm_ -rf "${userbackup}" "${gamebackup}"
+	rm_ -f "${installdir}/.lw_install"
 
 	echo "Everything should be restored to pre mod versions."
 }
@@ -99,54 +99,54 @@ function uninstall_old() {
 		if [[ $yn == y || $yn == Y ]]
 		then
 			echo "Removing old LW backup and all its content..."
-			rm_ -rf ${installdir}/backup_oldLW
-			rm_ -rf ${userfiles}/backup_oldLW
+			rm_ -rf "${installdir}/backup_oldLW"
+			rm_ -rf "${userfiles}/backup_oldLW"
 		else
 			exit 1
 		fi
 	fi
 
 	# backup old LW files
-	mkdir_ ${installdir}/backup_oldLW
+	mkdir_ "${installdir}/backup_oldLW"
 	while read file; do
-		mv_ ${installdir}/${file} ${installdir}/backup_oldLW
-	done < ${installdir}/.lw_install
+		mv_ "${installdir}/${file}" "${installdir}/backup_oldLW"
+	done < "${installdir}/.lw_install"
 
-	usersaves=$userfiles/savedata
-	userconf=$userfiles/WritableFiles
-	cp_ -r $usersaves ${installdir}/backup_oldLW
-	cp_ -r $userconf ${userfiles}/backup_oldLW
+	usersaves="$userfiles/savedata"
+	userconf="$userfiles/WritableFiles"
+	cp_ -r "$usersaves" "${installdir}/backup_oldLW"
+	cp_ -r "$userconf" "${userfiles}/backup_oldLW"
 
 	# restore original files
-	cp_ -r ${installdir}/backup/* ${installdir}/
+	cp_ -r "${installdir}/backup/*" "${installdir}/"
 	# no need to restore savedata or userdata since both would just be deleted anyway
 
-	rm_ -f ${installdir}/.lw_install
+	rm_ -f "${installdir}/.lw_install"
 
 	echo "old LW version backed up in:"
-	echo ${installdir}/backup_oldLW
-	echo ${userfiles}/backup_oldLW
+	echo "${installdir}/backup_oldLW"
+	echo "${userfiles}/backup_oldLW"
 }
 
 function backup() {
-	mkdir_ $userbackup
-	mkdir_ $gamebackup
+	mkdir_ "$userbackup"
+	mkdir_ "$gamebackup"
 
 	# backup user files
-	usersaves=$userfiles/savedata
-	userconf=$userfiles/WritableFiles
+	usersaves="$userfiles/savedata"
+	userconf="$userfiles/WritableFiles"
 
-	cp_ -r $usersaves $userbackup
-	cp_ -r $userconf $userbackup
+	cp_ -r "$usersaves" "$userbackup"
+	cp_ -r "$userconf" "$userbackup"
 
 	# iterate through LW files and backup corresponding game files
 	# for each LW upk file check if corresponding .upk.uncompressed_size file exist and back it up
 	for file in ${LW_FILES}; do
 		case "$file" in
 			*upk)
-				if [ -e ${installdir}/$file.uncompressed_size ]; then
-					mkdir_ -p ${gamebackup}/`dirname $file`
-					cp_ ${installdir}/$file.uncompressed_size $gamebackup/$file.uncompressed_size
+				if [ -e "${installdir}/$file.uncompressed_size" ]; then
+					mkdir_ -p "${gamebackup}/`dirname $file`"
+					cp_ "${installdir}/$file.uncompressed_size" "$gamebackup/$file.uncompressed_size"
 				fi
 				;;
 		esac
@@ -154,17 +154,17 @@ function backup() {
 
 	# backup xcomgame.int and xcomuishell.int in feraloverrides
 	for file in ${FERAL_OVERRIDES}; do
-		if [ -e ${installdir}/${FERAL_OVERRIDE_DIR}/`basename $file` ]; then
-			mkdir_ -p ${gamebackup}/`dirname $file`
-			cp_ "${installdir}/${FERAL_OVERRIDE_DIR}/`basename $file`" ${gamebackup}/$file
+		if [ -e "${installdir}/${FERAL_OVERRIDE_DIR}/`basename $file`" ]; then
+			mkdir_ -p "${gamebackup}/${FERAL_OVERRIDE_DIR}"
+			cp_ "${installdir}/${FERAL_OVERRIDE_DIR}/`basename $file`" "${gamebackup}/${FERAL_OVERRIDE_DIR}/`basename $file`"
 		fi
 	done
 
 	# backup remaining files
 	for file in ${LW_FILES}; do
-		if [ -e ${installdir}/${file} ]; then
-			mkdir_ -p ${gamebackup}/`dirname $file`
-			cp_ ${installdir}/${file} ${gamebackup}/$file
+		if [ -e "${installdir}/${file}" ]; then
+			mkdir_ -p "${gamebackup}/`dirname $file`"
+			cp_ "${installdir}/${file}" "${gamebackup}/$file"
 		fi
 	done
 }
@@ -174,36 +174,36 @@ function install() {
 	for file in ${LW_FILES}; do
 		case "$file" in
 			*upk)
-				if [ -e ${installdir}/$file.uncompressed_size ]; then
-					rm_ -f ${installdir}/$file.uncompressed_size
+				if [ -e "${installdir}/$file.uncompressed_size" ]; then
+					rm_ -f "${installdir}/$file.uncompressed_size"
 				fi
 				;;
 		esac
 	done
 
 	# copy LW files to game dir
-	cp_ -r ${MOD_DATA_DIR}/* ${installdir}
+	cp_ -r "${MOD_DATA_DIR}/*" "${installdir}"
 	INSTALLED_FILES="${LW_FILES}"
 
 	# copy xcomgame.int and xcomuishell.int to feraloverrides
 	for file in ${FERAL_OVERRIDES}; do
-		cp_ ${MOD_DATA_DIR}/$file ${installdir}/${FERAL_OVERRIDE_DIR}/`basename $file`
+		cp_ "${MOD_DATA_DIR}/$file ${installdir}/${FERAL_OVERRIDE_DIR}/`basename $file`"
 		INSTALLED_FILES="${INSTALLED_FILES}
 ${FERAL_OVERRIDE_DIR}/`basename $file`"
 	done
 
 	# copy LW defaultgamecore.ini to WritableFiles/XComGameCore.ini
-	cp_ ${MOD_CONFIG_DIR}/defaultgamecore.ini ${userfiles}/WritableFiles/XComGameCore.ini
+	cp_ "${MOD_CONFIG_DIR}/defaultgamecore.ini" "${userfiles}/WritableFiles/XComGameCore.ini"
 
 	# copy LW defaultloadouts.ini to WritableFiles/XComLoadouts.ini
-	cp_ ${MOD_CONFIG_DIR}/defaultloadouts.ini ${userfiles}/WritableFiles/XComLoadouts.ini
+	cp_ "${MOD_CONFIG_DIR}/defaultloadouts.ini" "${userfiles}/WritableFiles/XComLoadouts.ini"
 
 	if ! ${dry_run}; then
 		echo "${INSTALLED_FILES}" > "${installdir}/.lw_install"
 	fi
 	
 	if [ ! -e "${installdir}/binaries/linux/${SELFNAME}" ]; then
-		cp_ $0 "${installdir}/binaries/linux"
+		cp_ "$0" "${installdir}/binaries/linux"
 		ln_ -s "${installdir}/binaries/linux/${SELFNAME}" "${installdir}/binaries/linux/uninstall-LW.sh"
 	fi
 }
@@ -211,9 +211,9 @@ ${FERAL_OVERRIDE_DIR}/`basename $file`"
 # checking command line parameters
 if [ -z $1 ]
 	then
-		userfiles=${USERFILES}
+		userfiles="${USERFILES}"
 	else
-		userfiles=$1
+		userfiles="$1"
 fi
 
 if [ -z $2 ]
@@ -230,18 +230,18 @@ if [ -z $2 ]
 				if [ `basename "${installdir}"` != xew ]; then
 					installdir="${installdir}/xew"
 				fi
-				if [ ! -d ${installdir} ]; then
+				if [ ! -d "${installdir}" ]; then
 					echo "invalid directory specified."
 					exit 1
 				fi
 			fi
 		fi
 	else
-		installdir=$2
+		installdir="$2"
 fi
 
 # checking if directories exist
-if [ -d $userfiles ]
+if [ -d "$userfiles" ]
 	then
 		echo "User files dir: $userfiles"
 	else
@@ -250,8 +250,8 @@ if [ -d $userfiles ]
 fi
 
 # backup location for existing files
-userbackup=$userfiles/backup
-gamebackup=$installdir/backup
+userbackup="$userfiles/backup"
+gamebackup="$installdir/backup"
 
 if $IS_UNINSTALL; then
 	if [ -f "${installdir}/.lw_install" ]; then
@@ -286,15 +286,15 @@ fi
 
 if ${backup_data}; then
 	# check if backup dir already exist
-	if [ -d ${userbackup} -o -d ${gamebackup} ]; then
+	if [ -d "${userbackup}" -o -d "${gamebackup}" ]; then
 		echo "old backup already exists in ${userbackup} or ${gamebackup}."
 		echo -n "Owerwrite old backup? (y/n) "
 		read yn
 		if [[ $yn == y || $yn == Y ]]
 		then
 			echo "Removing old backup and all its content..."
-			rm_ -rf $userbackup
-			rm_ -rf $gamebackup
+			rm_ -rf "$userbackup"
+			rm_ -rf "$gamebackup"
 		else
 			exit 1
 		fi
@@ -308,12 +308,12 @@ if ${backup_data}; then
 fi
 
 # clear user files
-usersaves=$userfiles/savedata
-userconf=$userfiles/WritableFiles
+usersaves="$userfiles/savedata"
+userconf="$userfiles/WritableFiles"
 if ! ${keep_saves}; then
-	rm_ -f $usersaves/*
+	rm_ -f "$usersaves/*"
 fi
-rm_ -f $userconf/*
+rm_ -f "$userconf/*"
 
 echo "Copying install files..."
 
