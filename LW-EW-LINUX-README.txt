@@ -9,6 +9,8 @@ Before you begin
 
 This mod is for Steam version of XCOM: Enemy Within only.
 
+Ensure the game was started at least once without the mod (fails to load menu if it never phoned home).
+
 Switch off all Steam online features for XCOM: cloud sync and automatic updates.
 
 
