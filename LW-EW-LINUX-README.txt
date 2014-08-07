@@ -67,6 +67,7 @@ Troubleshooting
 If you're experiencing some strange bugs, like 4 man squad instead of 6 from the start, unusual alien stats, etc try to block Firaxis' servers via /etc/hosts:
 127.0.0.1       prod.xcom.firaxis.com
 127.0.0.1       prod.xcom-ew.firaxis.com
+And then reinstall the mod.
 
 
 Credits
