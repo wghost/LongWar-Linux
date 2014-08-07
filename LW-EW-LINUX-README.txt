@@ -26,10 +26,10 @@ Install notes
    or
    ~/.steam/steam/SteamApps/common/XCom-Enemy-Unknown/xew
    
-   Script will also owerwrite user files. By default those are searched in:
+   Script will also overwrite user files. By default those are searched in:
    ~/.local/share/feral-interactive/XCOM/XEW
    
-   If you have XCOM:EW installed to any other location, you'll have to pass that location to script via command line:
+   If you have XCOM:EW installed to some other location, you'll have to pass that location to script via command line:
    ./install-LW.sh /path/to/XEW/userfiles /path/to/XEW/install/dir
    
 3. Install script will automatically backup you profile, existing saved games, user configuration files and vanilla game resources.
