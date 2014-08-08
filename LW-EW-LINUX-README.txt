@@ -7,11 +7,11 @@ This file contains Linux specific install and uninstall instructions. Original m
 Before you begin
 ----------------
 
-This mod is for Steam version of XCOM: Enemy Within only.
+1. This mod is for Steam version of XCOM: Enemy Within only.
 
-Ensure the game was started at least once without the mod (fails to load menu if it never phoned home).
+2. Ensure the game was started at least once without the mod (fails to load menu if it never phoned home).
 
-Switch off all Steam online features for XCOM: cloud sync and automatic updates.
+3. Switch off all Steam online features for XCOM: cloud sync and automatic updates.
 
 
 Install notes
@@ -76,3 +76,4 @@ Long War Team: JohnnyLump, Amineri, XMarksTheSpot and the others (full list in .
 shivoc (Linux version install script main author, testing)
 falex007 (Linux version install script contributor, testing)
 wghost81 (Linux version testing and bugfixing)
+Spongeroberto (Linux version testing)
