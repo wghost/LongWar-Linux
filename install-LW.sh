@@ -67,7 +67,7 @@ function ln_() {
 }
 
 function uninstall() {
-	echo "uninstalling LW mod now"
+	echo "uninstalling Long War mod now"
 
 	# delete mod files
 	while read file; do
@@ -93,12 +93,12 @@ function uninstall() {
 function uninstall_old() {
 	echo "uninstalling old version now"
 	if [ -e "${installdir}/backup_oldLW" -o -e "${userfiles}/backup_oldLW" ]; then
-		echo "found old LW backup in ${installdir}/backup_oldLW or ${userfiles}/backup_oldLW"
-		echo -en "\e[0;31mremove old LW backup files?\e[0m (y/n)"
+		echo "found old Long War backup in ${installdir}/backup_oldLW or ${userfiles}/backup_oldLW"
+		echo -en "\e[0;31mremove old Long War backup files?\e[0m (y/n)"
 		read yn
 		if [[ $yn == y || $yn == Y ]]
 		then
-			echo "Removing old LW backup and all its content..."
+			echo "Removing old Long War backup and all its content..."
 			rm_ -rf "${installdir}/backup_oldLW"
 			rm_ -rf "${userfiles}/backup_oldLW"
 		else
@@ -123,7 +123,7 @@ function uninstall_old() {
 
 	rm_ -f "${installdir}/.lw_install"
 
-	echo "old LW version backed up in:"
+	echo "old Long War version backed up in:"
 	echo "${installdir}/backup_oldLW"
 	echo "${userfiles}/backup_oldLW"
 }
@@ -224,7 +224,7 @@ if [ -z $2 ]
 			if [ -d ${INSTALLDIR2} ]; then
 				installdir=${INSTALLDIR2};
 			else
-				echo "Can not find game files. Please specify location of xew dir"
+				echo "Can not find game files. Please specify xew dir location"
 				read installdir
 				installdir="${installdir%/}"
 				if [ `basename "${installdir}"` != xew ]; then
@@ -263,7 +263,7 @@ if $IS_UNINSTALL; then
 			echo "you can find the savegames in ${userfiles}/savedata and settings in ${userfiles}/WritableFiles if you want to back them up."
 		fi
 	else
-		echo "LW install not found!"
+		echo "Long War install not found!"
 	fi
 	
 	exit 0
@@ -271,7 +271,7 @@ fi
 
 keep_saves=false
 if [ -f "${installdir}/.lw_install" ]; then
-	echo -ne "\e[0;31mOld version of LW found. Keep savegames?\e[0m (y/n)"
+	echo -ne "\e[0;31mOld version of Long War found. Keep savegames?\e[0m (y/n)"
 	read yn
 	if [[ $yn == y || $yn == Y ]]; then
 		echo "keeping savegames"
@@ -319,7 +319,7 @@ echo "Copying install files..."
 
 install
 
-echo -e "\e[0;32mLong War installed successful.\e[0m"
+echo -e "\e[0;32mLong War installed successfully.\e[0m"
 echo "Now run the game. Remeber to check your game settings (especially video settings)."
 
 exit 0
