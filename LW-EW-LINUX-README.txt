@@ -70,6 +70,12 @@ If you're experiencing some strange bugs, like 4 man squad instead of 6 from the
 And then reinstall the mod.
 
 
+Modding Long War under Linux
+----------------------------
+
+If original Windows readme instructs you to edit DefaultGameCore.ini, you should edit ~/.local/share/feral-interactive/XCOM/XEW/WritableFiles/XComGameCore.ini instead.
+
+
 Credits
 -------
 Long War Team: JohnnyLump, Amineri, XMarksTheSpot and the others (full list in ./docs/Long_War_EW_ReadMe.txt)
