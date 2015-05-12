@@ -9,7 +9,7 @@ INSTALLDIR2=~/.steam/steam/SteamApps/common/XCom-Enemy-Unknown/xew
 MOD_DATA_DIR="`dirname $0`/install-files"
 MOD_CONFIG_DIR="${MOD_DATA_DIR}/xcomgame/config"
 
-FERAL_OVERRIDES="xcomgame/localization/int/xcomgame.int xcomgame/localization/int/xcomuishell.int"
+FERAL_OVERRIDES="xcomgame/localization/int/xcomgame.int xcomgame/localization/int/xcomuishell.int xcomgame/localization/fra/xcomgame.fra xcomgame/localization/fra/xcomuishell.fra xcomgame/localization/esn/xcomgame.esn xcomgame/localization/esn/xcomuishell.esn"
 FERAL_OVERRIDE_DIR="binaries/share/feraloverrides"
 
 LW_FILES=`find ${MOD_DATA_DIR}/ -type f | sed s,${MOD_DATA_DIR}/,,g`
